@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\DocuSeal\AppInfo;
 
-use OCA\DocuSeal\Activity\Provider as ActivityProvider;
-use OCA\DocuSeal\Activity\Setting as ActivitySetting;
 use OCA\DocuSeal\Dashboard\DocuSealWidget;
 use OCA\DocuSeal\Listener\CSPListener;
 use OCA\DocuSeal\Notification\Notifier;
@@ -25,25 +23,20 @@ class Application extends App implements IBootstrap {
 
 	public function __construct(array $urlParams = []) {
 		parent::__construct(self::APP_ID, $urlParams);
+
+		// Load file action scripts in constructor (same pattern as integration_docusign)
+		$container = $this->getContainer();
+		$eventDispatcher = $container->get(IEventDispatcher::class);
+		$eventDispatcher->addListener(LoadAdditionalScriptsEvent::class, function (): void {
+			Util::addScript(self::APP_ID, self::APP_ID . '-filesplugin');
+			Util::addStyle(self::APP_ID, 'files-style');
+		});
 	}
 
 	public function register(IRegistrationContext $context): void {
-		// Notifications
 		$context->registerNotifierService(Notifier::class);
-
-		// Unified Search
 		$context->registerSearchProvider(DocuSealSearchProvider::class);
-
-		// Dashboard Widget
 		$context->registerDashboardWidget(DocuSealWidget::class);
-
-		// Activity
-		$context->registerEventListener(
-			\OCP\Activity\IManager::class,
-			ActivityProvider::class
-		);
-
-		// CSP for iframe embedding
 		$context->registerEventListener(
 			AddContentSecurityPolicyEvent::class,
 			CSPListener::class
@@ -51,12 +44,5 @@ class Application extends App implements IBootstrap {
 	}
 
 	public function boot(IBootContext $context): void {
-		$context->injectFn(function (IEventDispatcher $eventDispatcher): void {
-			$eventDispatcher->addListener(LoadAdditionalScriptsEvent::class, function (): void {
-				Util::addScript(self::APP_ID, self::APP_ID . '-filesplugin');
-				Util::addScript(self::APP_ID, self::APP_ID . '-sidebar');
-				Util::addStyle(self::APP_ID, 'files-style');
-			});
-		});
 	}
 }

@@ -1,0 +1,12 @@
+/* Admin settings styles */
+#docuseal-admin-settings .field input[type="url"],
+#docuseal-admin-settings .field input[type="password"],
+#docuseal-admin-settings .field input[type="text"] {
+	width: 100%;
+	max-width: 400px;
+	padding: 8px 12px;
+}
+
+#docuseal-admin-settings button.primary {
+	margin-top: 8px;
+}

@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	  xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+	<id>integration_docuseal</id>
+	<name>DocuSeal Integration</name>
+	<summary>Integration with DocuSeal Enterprise for electronic signatures</summary>
+	<description><![CDATA[DocuSeal integration provides electronic signature capabilities directly from Nextcloud Files.
+
+### Features
+- Request signatures on PDF files from Nextcloud users or external email addresses
+- Use DocuSeal templates or upload PDFs directly
+- Embedded signing within Nextcloud or via email
+- Track signature request status in the file sidebar
+- Automatic download of signed documents back to Nextcloud
+- Webhook-based real-time status updates
+- Nextcloud notification system integration
+
+### Configuration
+1. Go to **Settings → Connected accounts → DocuSeal**
+2. Enter your DocuSeal server URL and API key
+3. Start requesting signatures from the Files app
+	]]></description>
+	<version>1.0.0</version>
+	<licence>agpl</licence>
+	<author mail="admin@ce4u.it">GEST CE</author>
+	<namespace>DocuSeal</namespace>
+	<category>integration</category>
+	<category>office</category>
+	<website>https://docusign.ce4u.it</website>
+	<bugs>https://docusign.ce4u.it</bugs>
+	<dependencies>
+		<nextcloud min-version="28" max-version="34"/>
+		<php min-version="8.1"/>
+	</dependencies>
+	<background-jobs>
+		<job>OCA\DocuSeal\BackgroundJob\CheckSignatureStatus</job>
+	</background-jobs>
+	<settings>
+		<admin>OCA\DocuSeal\Settings\Admin</admin>
+		<admin-section>OCA\DocuSeal\Settings\AdminSection</admin-section>
+	</settings>
+	<navigations/>
+	<types>
+		<type>filesystem</type>
+		<type>dav</type>
+	</types>
+</info>

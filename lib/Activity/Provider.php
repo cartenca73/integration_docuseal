@@ -18,7 +18,7 @@ class Provider implements IActivityProvider {
 	) {
 	}
 
-	public function parse(string $language, IEvent $event, ?IEvent $previousEvent = null): IEvent {
+	public function parse($language, IEvent $event, ?IEvent $previousEvent = null): IEvent {
 		if ($event->getApp() !== Application::APP_ID) {
 			throw new \InvalidArgumentException();
 		}

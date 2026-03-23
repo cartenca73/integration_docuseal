@@ -112,7 +112,8 @@ class DocuSealAPIService {
 	/**
 	 * Upload a file directly and create a submission
 	 *
-	 * Uses POST /submissions/pdf to create from PDF with field tags
+	 * DocuSeal workflow: 1) Create template from file via /templates/pdf
+	 *                    2) Create submission from that template via /submissions
 	 */
 	public function createDirectSubmission(
 		string $fileContent,
@@ -123,100 +124,117 @@ class DocuSealAPIService {
 		bool $sendEmail = true,
 		?string $expireAt = null,
 	): array {
-		$serverUrl = $this->getServerUrl();
-		$apiKey = $this->getApiKey();
-
-		if ($serverUrl === '' || $apiKey === '') {
-			throw new Exception('DocuSeal is not configured');
-		}
-
-		// Determine endpoint based on file extension
+		// Step 1: Create a template from the uploaded file
 		$ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+		$mimeMap = [
+			'pdf' => 'application/pdf',
+			'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+			'doc' => 'application/msword',
+			'png' => 'image/png',
+			'jpg' => 'image/jpeg',
+			'jpeg' => 'image/jpeg',
+		];
+		$mime = $mimeMap[$ext] ?? 'application/pdf';
+
 		$endpointMap = [
-			'pdf' => '/api/submissions/pdf',
-			'docx' => '/api/submissions/docx',
-			'doc' => '/api/submissions/docx',
-			'png' => '/api/submissions/pdf',
-			'jpg' => '/api/submissions/pdf',
-			'jpeg' => '/api/submissions/pdf',
+			'pdf' => '/templates/pdf',
+			'docx' => '/templates/docx',
+			'doc' => '/templates/docx',
+			'png' => '/templates/pdf',
+			'jpg' => '/templates/pdf',
+			'jpeg' => '/templates/pdf',
 		];
-		$endpoint = $endpointMap[$ext] ?? '/api/submissions/pdf';
+		$templateEndpoint = $endpointMap[$ext] ?? '/templates/pdf';
 
-		$url = $serverUrl . $endpoint;
-		$client = $this->clientService->newClient();
+		$base64File = 'data:' . $mime . ';base64,' . base64_encode($fileContent);
+		$templateName = pathinfo($fileName, PATHINFO_FILENAME) . ' - ' . date('Y-m-d H:i');
 
-		// Build multipart form data
-		$multipart = [
-			[
-				'name' => 'file',
-				'content' => $fileContent,
-				'filename' => $fileName,
-			],
-		];
-
-		// Add submitters
-		foreach ($submitters as $i => $submitter) {
-			$multipart[] = [
-				'name' => "submitters[$i][email]",
-				'content' => $submitter['email'],
-			];
-			if (!empty($submitter['name'])) {
-				$multipart[] = [
-					'name' => "submitters[$i][name]",
-					'content' => $submitter['name'],
-				];
-			}
-			if (!empty($submitter['role'])) {
-				$multipart[] = [
-					'name' => "submitters[$i][role]",
-					'content' => $submitter['role'],
-				];
-			}
-			$multipart[] = [
-				'name' => "submitters[$i][send_email]",
-				'content' => $sendEmail ? 'true' : 'false',
-			];
-		}
-
-		// Add message if provided
-		if ($subject !== null) {
-			$multipart[] = [
-				'name' => 'message[subject]',
-				'content' => $subject,
-			];
-		}
-		if ($message !== null) {
-			$multipart[] = [
-				'name' => 'message[body]',
-				'content' => $message,
-			];
-		}
-
-		if ($expireAt !== null) {
-			$multipart[] = [
-				'name' => 'expire_at',
-				'content' => $expireAt,
-			];
-		}
-
-		try {
-			$response = $client->post($url, [
-				'headers' => [
-					'X-Auth-Token' => $apiKey,
-					'Accept' => 'application/json',
+		$templateResult = $this->request('POST', $templateEndpoint, [
+			'name' => $templateName,
+			'documents' => [
+				[
+					'name' => $fileName,
+					'file' => $base64File,
 				],
-				'multipart' => $multipart,
-				'timeout' => 60,
-			]);
+			],
+		]);
 
-			$body = $response->getBody();
-			return json_decode($body, true) ?? [];
-		} catch (Exception $e) {
-			$this->logger->error('DocuSeal direct submission error: ' . $e->getMessage(), [
-				'app' => Application::APP_ID,
-			]);
-			throw $e;
+		$templateId = $templateResult['id'] ?? null;
+		if ($templateId === null) {
+			throw new Exception('Failed to create template from file');
 		}
+
+		$this->logger->info('Created template #' . $templateId . ' from file: ' . $fileName, [
+			'app' => Application::APP_ID,
+		]);
+
+		// Add default signature field if template has no fields
+		if (empty($templateResult['fields'])) {
+			$submitterUuid = $templateResult['submitters'][0]['uuid'] ?? null;
+			$documentAttachmentUuid = $templateResult['schema'][0]['attachment_uuid'] ?? null;
+
+			$fields = [
+				[
+					'name' => 'Firma',
+					'type' => 'signature',
+					'required' => true,
+					'areas' => [[
+						'x' => 0.1,
+						'y' => 0.85,
+						'w' => 0.35,
+						'h' => 0.06,
+						'page' => 0,
+					]],
+				],
+				[
+					'name' => 'Data',
+					'type' => 'date',
+					'required' => true,
+					'areas' => [[
+						'x' => 0.55,
+						'y' => 0.85,
+						'w' => 0.2,
+						'h' => 0.04,
+						'page' => 0,
+					]],
+				],
+			];
+
+			// Assign submitter UUID if available
+			if ($submitterUuid !== null) {
+				foreach ($fields as &$field) {
+					$field['submitter_uuid'] = $submitterUuid;
+					if ($documentAttachmentUuid !== null) {
+						foreach ($field['areas'] as &$area) {
+							$area['attachment_uuid'] = $documentAttachmentUuid;
+						}
+						unset($area);
+					}
+				}
+				unset($field);
+			}
+
+			$this->request('PUT', '/templates/' . $templateId, [
+				'fields' => $fields,
+			]);
+		}
+
+		// Step 2: Create submission from the template
+		// Map submitter roles to the template's first submitter role
+		$templateRole = $templateResult['submitters'][0]['name'] ?? 'First Party';
+		foreach ($submitters as &$submitter) {
+			$submitter['role'] = $templateRole;
+		}
+		unset($submitter);
+
+		return $this->createTemplateSubmission(
+			$templateId,
+			$submitters,
+			$sendEmail,
+			$subject,
+			$message,
+			$expireAt,
+		);
 	}
 
 	/**

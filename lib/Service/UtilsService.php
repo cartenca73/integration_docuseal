@@ -83,9 +83,10 @@ class UtilsService {
 	): int {
 		$userFolder = $this->rootFolder->getUserFolder($userId);
 
-		// Build the signed file name
+		// Build the signed file name: originalname_signed_YYYYMMDD_HHmmss.ext
 		$pathInfo = pathinfo($originalName);
-		$signedName = ($pathInfo['filename'] ?? $originalName) . '_signed.' . ($pathInfo['extension'] ?? 'pdf');
+		$datetime = date('Ymd_His');
+		$signedName = ($pathInfo['filename'] ?? $originalName) . '_signed_' . $datetime . '.' . ($pathInfo['extension'] ?? 'pdf');
 
 		// Determine target directory (same as original file)
 		$targetDir = dirname($originalPath);

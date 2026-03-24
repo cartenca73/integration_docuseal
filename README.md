@@ -5,60 +5,60 @@
 [![Vue 3](https://img.shields.io/badge/Vue-3-green?logo=vue.js)](https://vuejs.org)
 [![License](https://img.shields.io/badge/License-AGPL--3.0-red)](LICENSE)
 
-Integrazione completa di **DocuSeal Enterprise** (self-hosted) con Nextcloud per la firma elettronica dei documenti direttamente dall'app File.
+Full integration of **DocuSeal Enterprise** (self-hosted) with Nextcloud for electronic document signing directly from the Files app.
 
 ---
 
-## Funzionalita
+## Features
 
-### Firma Documenti
-- **Firma diretta** - Click destro su PDF, DOCX o immagine -> invia per la firma
-- **Firma via template** - Usa template DocuSeal preconfigurati con anteprima campi/ruoli
-- **Firma embedded** - I firmatari possono firmare direttamente dentro Nextcloud (iframe)
-- **Firma via email** - DocuSeal invia email ai firmatari con link di firma
-- **Destinatari multipli** - Utenti Nextcloud (autocomplete) o email esterne
+### Document Signing
+- **Direct signing** - Right-click on PDF, DOCX or image -> send for signature
+- **Template-based signing** - Use pre-configured DocuSeal templates with field/role preview
+- **Embedded signing** - Signers can sign directly within Nextcloud (iframe)
+- **Email signing** - DocuSeal sends emails to signers with signing links
+- **Multiple recipients** - Nextcloud users (autocomplete) or external email addresses
 
-### Tracking e Gestione
-- **Stato in tempo reale** - Sidebar del file con stato di ogni firmatario e barra progresso
-- **Notifiche Nextcloud** - Firmato, rifiutato, completato, scaduto
-- **Download automatico** - Il PDF firmato viene salvato automaticamente nella stessa cartella
-- **Audit trail** - Timeline completa con download del log di audit PDF
-- **Reinvio promemoria** - Reinvia notifica a chi non ha ancora firmato
-- **Annullamento** - Annulla richieste di firma pendenti
-- **Scadenza** - Imposta data di scadenza sulle richieste
+### Tracking & Management
+- **Real-time status** - File sidebar with per-signer status and progress bar
+- **Nextcloud notifications** - Signed, declined, completed, expired
+- **Automatic download** - Signed PDF is saved automatically in the same folder
+- **Audit trail** - Full timeline with PDF audit log download
+- **Send reminders** - Resend notification to signers who haven't signed yet
+- **Cancellation** - Cancel pending signature requests
+- **Expiry** - Set expiration date on requests
 
-### Integrazioni Nextcloud
-- **Unified Search** - Cerca richieste di firma dalla barra di ricerca
-- **Dashboard Widget** - Widget con stato firme pendenti
-- **Activity** - Log attivita integrato con l'app Activity
-- **CSP Policy** - Content Security Policy automatica per iframe embedding
+### Nextcloud Integrations
+- **Unified Search** - Search signature requests from the search bar
+- **Dashboard Widget** - Widget showing pending signature status
+- **Activity** - Integrated activity log with the Activity app
+- **CSP Policy** - Automatic Content Security Policy for iframe embedding
 
-### Sicurezza
-- **API Key criptata** - Stored con ICrypto di Nextcloud
-- **Webhook HMAC-SHA256** - Validazione webhook con secret condiviso
-- **Controllo accesso file** - Verifica permessi prima di ogni operazione
+### Security
+- **Encrypted API Key** - Stored using Nextcloud's ICrypto
+- **Webhook HMAC-SHA256** - Webhook validation with shared secret
+- **File access control** - Permission checks before every operation
 
-### Multilingue
-Traduzioni complete: **Italiano**, **English**, **Deutsch**, **Francais**, **Espanol**
+### Multi-language
+Full translations: **Italian**, **English**, **German**, **French**, **Spanish**
 
-La lingua viene selezionata automaticamente in base alle impostazioni Nextcloud dell'utente.
+Language is selected automatically based on the user's Nextcloud settings.
 
 ---
 
-## Requisiti
+## Requirements
 
-| Componente | Versione |
+| Component | Version |
 |---|---|
 | Nextcloud | 28 - 34 |
 | PHP | 8.1+ |
 | DocuSeal Enterprise | Self-hosted |
-| Node.js | 20+ (solo per build) |
+| Node.js | 20+ (build only) |
 
 ---
 
-## Installazione
+## Installation
 
-### 1. Copia l'app
+### 1. Copy the app
 
 ```bash
 cp -r integration_docuseal /path/to/nextcloud/apps/
@@ -73,112 +73,112 @@ npm install --legacy-peer-deps
 npm run build
 ```
 
-### 3. Abilita l'app
+### 3. Enable the app
 
 ```bash
 sudo -u www-data php occ app:enable integration_docuseal
 ```
 
-### 4. Configura
+### 4. Configure
 
-1. Vai su **Impostazioni -> Account connessi -> DocuSeal**
-2. Inserisci l'URL del tuo server DocuSeal (es. `https://docuseal.example.com`)
-3. Inserisci la API Key (la trovi in DocuSeal: Impostazioni -> API)
-4. Clicca **Salva** - la connessione viene testata automaticamente
+1. Go to **Settings -> Connected accounts -> DocuSeal**
+2. Enter your DocuSeal server URL (e.g. `https://docuseal.example.com`)
+3. Enter the API Key (found in DocuSeal: Settings -> API)
+4. Click **Save** - the connection is tested automatically
 
-### 5. Configura Webhook (opzionale ma consigliato)
+### 5. Configure Webhook (optional but recommended)
 
-Nel pannello admin di DocuSeal:
-1. Vai su **Impostazioni -> Webhook**
-2. Inserisci l'URL: `https://tuonextcloud.com/apps/integration_docuseal/webhook`
-3. (Opzionale) Configura un secret condiviso per la validazione HMAC
+In the DocuSeal admin panel:
+1. Go to **Settings -> Webhook**
+2. Enter the URL: `https://yournextcloud.com/apps/integration_docuseal/webhook`
+3. (Optional) Set a shared secret for HMAC validation
 
 ---
 
-## Utilizzo
+## Usage
 
-### Richiedere una firma
+### Requesting a signature
 
-1. Vai nell'app **File** di Nextcloud
-2. Click destro su un file PDF, DOCX o immagine
-3. Seleziona **"Richiedi firma con DocuSeal"**
-4. Scegli la modalita:
-   - **Invio diretto** - Il file viene inviato cosi com'e
-   - **Template DocuSeal** - Usa un template preconfigurato
-5. Aggiungi i destinatari (utenti NC o email)
-6. Opzioni: email, firma embedded, scadenza, messaggio personalizzato
-7. Clicca **Richiedi firma**
+1. Go to the Nextcloud **Files** app
+2. Right-click on a PDF, DOCX or image file
+3. Select **"Request signature with DocuSeal"**
+4. Choose the mode:
+   - **Direct upload** - The file is sent as-is
+   - **DocuSeal template** - Use a pre-configured template
+5. Add recipients (Nextcloud users or email addresses)
+6. Options: email notification, embedded signing, expiry, custom message
+7. Click **Request signature**
 
-### Monitorare le firme
+### Monitoring signatures
 
-- Apri la **sidebar** di un file per vedere lo stato delle firme
-- Usa la **barra di ricerca** per trovare richieste di firma
-- Controlla il **Dashboard** per una panoramica
-- Ricevi **notifiche** in tempo reale
+- Open the file **sidebar** to see signature status
+- Use the **search bar** to find signature requests
+- Check the **Dashboard** for an overview
+- Receive real-time **notifications**
 
 ### Audit Trail
 
-Dalla sidebar del file, clicca **"Audit trail"** per vedere:
-- Timeline completa (inviato, aperto, firmato, rifiutato)
-- Download del log di audit in PDF da DocuSeal
+From the file sidebar, click **"Audit trail"** to view:
+- Full timeline (sent, opened, signed, declined)
+- PDF audit log download from DocuSeal
 
 ---
 
-## Architettura
+## Architecture
 
 ```
 integration_docuseal/
-├── appinfo/           Metadata app + 18 route API
+├── appinfo/           App metadata + 18 API routes
 ├── lib/
-│   ├── Activity/      Integrazione Activity app
-│   ├── BackgroundJob/ Polling stato ogni 15 min
-│   ├── Controller/    3 controller (Config, DocuSeal, Webhook)
-│   ├── Dashboard/     Widget Dashboard
-│   ├── Db/            2 entita + 2 mapper (requests + submitters)
-│   ├── Listener/      CSP per iframe
-│   ├── Migration/     Schema database
-│   ├── Notification/  4 tipi di notifica
+│   ├── Activity/      Activity app integration
+│   ├── BackgroundJob/ Status polling every 15 min
+│   ├── Controller/    3 controllers (Config, DocuSeal, Webhook)
+│   ├── Dashboard/     Dashboard widget
+│   ├── Db/            2 entities + 2 mappers (requests + submitters)
+│   ├── Listener/      CSP for iframes
+│   ├── Migration/     Database schema
+│   ├── Notification/  4 notification types
 │   ├── Search/        Unified Search provider
 │   ├── Service/       API service + utilities
-│   └── Settings/      Pannello admin
+│   └── Settings/      Admin panel
 ├── src/               Vue 3 components
-├── l10n/              5 lingue
+├── l10n/              5 languages
 └── tests/             PHPUnit tests
 ```
 
 ### Database
 
-Due tabelle:
-- `oc_docuseal_requests` - Richieste di firma (user, file, submission, status)
-- `oc_docuseal_submitters` - Firmatari (email, status, embed URL)
+Two tables:
+- `oc_docuseal_requests` - Signature requests (user, file, submission, status)
+- `oc_docuseal_submitters` - Signers (email, status, embed URL)
 
 ### API Endpoints
 
-| Metodo | Endpoint | Descrizione |
+| Method | Endpoint | Description |
 |---|---|---|
-| GET | `/info` | Verifica configurazione |
-| GET | `/templates` | Lista template DocuSeal |
-| GET | `/templates/{id}` | Dettaglio template |
-| POST | `/sign/direct/{fileId}` | Firma diretta file |
-| POST | `/sign/template` | Firma via template |
-| GET | `/requests` | Lista richieste utente |
-| GET | `/requests/{id}` | Dettaglio richiesta |
-| GET | `/requests/file/{fileId}` | Richieste per file |
-| POST | `/requests/{id}/resend/{submitterId}` | Reinvia promemoria |
-| POST | `/requests/{id}/cancel` | Annulla richiesta |
+| GET | `/info` | Check configuration |
+| GET | `/templates` | List DocuSeal templates |
+| GET | `/templates/{id}` | Template details |
+| POST | `/sign/direct/{fileId}` | Direct file signing |
+| POST | `/sign/template` | Template-based signing |
+| GET | `/requests` | List user requests |
+| GET | `/requests/{id}` | Request details |
+| GET | `/requests/file/{fileId}` | Requests for a file |
+| POST | `/requests/{id}/resend/{submitterId}` | Resend reminder |
+| POST | `/requests/{id}/cancel` | Cancel request |
 | GET | `/requests/{id}/audit` | Audit trail |
-| GET | `/embed/{requestId}` | URL firma embedded |
-| POST | `/webhook` | Webhook DocuSeal |
+| GET | `/embed/{requestId}` | Embedded signing URL |
+| POST | `/webhook` | DocuSeal webhook |
 
 ---
 
-## Sviluppo
+## Development
 
 ```bash
 # Setup
 make dev-setup
 
-# Build sviluppo
+# Development build
 npm run dev
 
 # Watch mode
@@ -190,27 +190,27 @@ make lint
 # Test
 make test
 
-# Build produzione
+# Production build
 npm run build
 
-# Package per distribuzione
+# Package for distribution
 make appstore
 ```
 
 ---
 
-## Tipi di file supportati
+## Supported file types
 
-| Tipo | Estensioni | Firma diretta | Template |
+| Type | Extensions | Direct signing | Template |
 |---|---|---|---|
-| PDF | .pdf | Si | Si |
-| Word | .docx, .doc | Si | Si |
-| Immagini | .png, .jpg, .jpeg | Si | Si |
+| PDF | .pdf | Yes | Yes |
+| Word | .docx, .doc | Yes | Yes |
+| Images | .png, .jpg, .jpeg | Yes | Yes |
 
 ---
 
-## Licenza
+## License
 
 AGPL-3.0-or-later
 
-Sviluppato da **GEST CE** per l'integrazione con DocuSeal Enterprise.
+Developed by **GEST CE** for integration with DocuSeal Enterprise.

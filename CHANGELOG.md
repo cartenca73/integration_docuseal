@@ -1,25 +1,37 @@
 # Changelog
 
+## [1.0.6] - 2026-03-24
+
+### Changed
+- Replaced all icons with new DocuSeal branding (monitor + pen design)
+
+### Fixed
+- Fixed FileAction API for @nextcloud/files v4 (was not a constructor)
+- Fixed null slot props crash in MultiselectWho component
+- Fixed NcCheckboxRadioSwitch binding (uses modelValue, not checked)
+- Removed taggable from NcSelect to fix null crash on non-email input
+- Fixed DocuSeal API 422 error: always include body in message param
+
 ## [1.0.0] - 2026-03-23
 
-### Aggiunto
-- Firma diretta di file PDF, DOCX e immagini
-- Firma tramite template DocuSeal con anteprima
-- Firma embedded (iframe) e via email
-- Tracking stato firme nella sidebar dei file con barra progresso
-- Download automatico dei documenti firmati
-- Webhook real-time con validazione HMAC-SHA256
-- Background job di polling ogni 15 minuti
-- Notifiche Nextcloud (firmato, rifiutato, completato, scaduto)
-- Unified Search per richieste di firma
+### Added
+- Direct signing of PDF, DOCX and image files
+- Template-based signing with DocuSeal template preview
+- Embedded signing (iframe) and email-based signing
+- Signature status tracking in file sidebar with progress bar
+- Automatic download of signed documents
+- Real-time webhooks with HMAC-SHA256 validation
+- Background polling job every 15 minutes
+- Nextcloud notifications (signed, declined, completed, expired)
+- Unified Search for signature requests
 - Dashboard Widget
-- Integrazione Activity app
-- CSP policy automatica per iframe
-- Reinvio promemoria ai firmatari
-- Annullamento richieste pendenti
-- Scadenza configurabile sulle richieste
-- Audit trail con timeline e download PDF
-- Traduzioni: Italiano, English, Deutsch, Francais, Espanol
-- Crittografia API key con ICrypto
+- Activity app integration
+- Automatic CSP policy for iframes
+- Resend reminders to signers
+- Cancel pending requests
+- Configurable expiry on requests
+- Audit trail with timeline and PDF download
+- Translations: Italian, English, German, French, Spanish
+- API key encryption with ICrypto
 - PHPUnit tests
-- Supporto Nextcloud 28-34, PHP 8.1+, Vue 3
+- Support for Nextcloud 28-34, PHP 8.1+, Vue 3

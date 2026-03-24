@@ -120,6 +120,7 @@
 import NcButton from '@nextcloud/vue/components/NcButton'
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
+import { translate as t } from '@nextcloud/l10n'
 import { loadState } from '@nextcloud/initial-state'
 import { showSuccess, showError } from '@nextcloud/dialogs'
 import DocuSealIcon from '../icons/DocuSealIcon.vue'
@@ -150,6 +151,7 @@ export default {
 	},
 
 	methods: {
+		t,
 		onInput() {
 			this.connectionStatus = null
 		},

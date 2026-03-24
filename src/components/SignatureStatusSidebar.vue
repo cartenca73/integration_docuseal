@@ -139,6 +139,7 @@ import NcButton from '@nextcloud/vue/components/NcButton'
 import NcModal from '@nextcloud/vue/components/NcModal'
 import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
 import { generateUrl } from '@nextcloud/router'
+import { translate as t } from '@nextcloud/l10n'
 import { showSuccess, showError } from '@nextcloud/dialogs'
 import axios from '@nextcloud/axios'
 import DocuSealIcon from '../icons/DocuSealIcon.vue'
@@ -181,6 +182,7 @@ export default {
 	},
 
 	methods: {
+		t,
 		async loadRequests() {
 			this.loading = true
 			try {

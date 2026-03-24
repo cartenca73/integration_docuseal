@@ -35,6 +35,7 @@ import NcSelect from '@nextcloud/vue/components/NcSelect'
 import NcAvatar from '@nextcloud/vue/components/NcAvatar'
 import axios from '@nextcloud/axios'
 import { generateOcsUrl } from '@nextcloud/router'
+import { translate as t } from '@nextcloud/l10n'
 
 const EMAIL_REGEX = /^\w+([.+-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/
 
@@ -72,6 +73,7 @@ export default {
 	},
 
 	methods: {
+		t,
 		onInput(val) {
 			this.$emit('update:modelValue', val)
 		},

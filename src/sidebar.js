@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import { translate as t } from '@nextcloud/l10n'
 import SignatureStatusSidebar from './components/SignatureStatusSidebar.vue'
 
 if (window.OCA?.Files?.Sidebar) {

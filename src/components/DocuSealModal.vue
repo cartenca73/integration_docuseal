@@ -152,6 +152,7 @@ import NcSelect from '@nextcloud/vue/components/NcSelect'
 import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
 import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
 import { generateUrl } from '@nextcloud/router'
+import { translate as t } from '@nextcloud/l10n'
 import { showSuccess, showError } from '@nextcloud/dialogs'
 import axios from '@nextcloud/axios'
 import MultiselectWho from './MultiselectWho.vue'
@@ -229,6 +230,7 @@ export default {
 	},
 
 	methods: {
+		t,
 		close() {
 			this.show = false
 			this.$emit('close')

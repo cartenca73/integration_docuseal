@@ -1,5 +1,6 @@
-import { registerFileAction, FileAction, Permission } from '@nextcloud/files'
+import { registerFileAction, Permission } from '@nextcloud/files'
 import { generateUrl } from '@nextcloud/router'
+import { translate as t } from '@nextcloud/l10n'
 import axios from '@nextcloud/axios'
 import { createApp } from 'vue'
 
@@ -59,11 +60,11 @@ async function showSignModal(fileInfo) {
 	modalApp.mount(container)
 }
 
-const docuSealAction = new FileAction({
+const docuSealAction = {
 	id: 'docuseal-sign',
 	displayName: () => t('integration_docuseal', 'Richiedi firma con DocuSeal'),
 	iconSvgInline: () => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6H6zm7 1.5L18.5 9H13V3.5zM9.5 17.5c0 .28-.22.5-.5.5s-.5-.22-.5-.5S8.72 17 9 17s.5.22.5.5zm2.5.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5.5.22.5.5-.22.5-.5.5zm2.5-.5c0 .28-.22.5-.5.5s-.5-.22-.5-.5.22-.5.5-.5.5.22.5.5zM7 14.5c1.5 0 2.5-1 3.5-2s2-2 3.5-2 2.5 1 3 1.5l-1 1c-.5-.5-1.3-1.2-2-1.2s-1.5.7-2.7 2c-1.2 1.3-2.3 2.2-4.3 2.2v-1.5z"/></svg>',
-	enabled(nodes) {
+	enabled({ nodes }) {
 		if (nodes.length !== 1) {
 			return false
 		}
@@ -83,7 +84,8 @@ const docuSealAction = new FileAction({
 		}
 		return true
 	},
-	async exec(node) {
+	async exec({ nodes }) {
+		const node = nodes[0]
 		const connected = await checkConnection()
 		if (!connected) {
 			if (window.OC?.Notification) {
@@ -95,6 +97,6 @@ const docuSealAction = new FileAction({
 		return null
 	},
 	order: 90,
-})
+}
 
 registerFileAction(docuSealAction)

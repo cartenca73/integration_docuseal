@@ -148,8 +148,11 @@
 						{{ t('integration_docuseal', 'Invia email di notifica ai destinatari') }}
 					</NcCheckboxRadioSwitch>
 					<NcCheckboxRadioSwitch :model-value="showEmbedOption" @update:model-value="showEmbedOption = $event">
-						{{ t('integration_docuseal', 'Abilita firma embedded (in-app)') }}
+						{{ t('integration_docuseal', 'Firma subito dopo l\'invio (se sei tra i firmatari)') }}
 					</NcCheckboxRadioSwitch>
+					<p v-if="showEmbedOption" class="hint option-hint">
+						{{ t('integration_docuseal', 'Dopo l\'invio si aprirà la finestra di firma direttamente qui, senza uscire da Nextcloud.') }}
+					</p>
 				</div>
 
 				<!-- Expiry date -->
@@ -662,8 +665,8 @@ export default {
 	justify-content: space-between;
 	padding: 12px 16px;
 	border-radius: var(--border-radius-large);
-	background: var(--color-success-light, #e8f5e9);
-	border: 1px solid var(--color-success, #4caf50);
+	background: #f0faf0;
+	border: 1px solid #4caf50;
 }
 
 .configured-badge {
@@ -671,7 +674,11 @@ export default {
 	align-items: center;
 	gap: 8px;
 	font-weight: 600;
-	color: var(--color-success, #2e7d32);
+	color: #1b5e20;
+}
+
+.configured-badge svg {
+	color: #4caf50;
 }
 
 /* ======== FORM SECTIONS ======== */
@@ -712,6 +719,12 @@ h2 {
 	color: var(--color-text-maxcontrast);
 	font-size: 0.85em;
 	margin-top: 4px;
+}
+
+.option-hint {
+	margin-left: 36px;
+	margin-bottom: 4px;
+	font-style: italic;
 }
 
 .template-preview {

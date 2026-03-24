@@ -3,13 +3,10 @@
 		v-model="selected"
 		:options="options"
 		:multiple="true"
-		:taggable="true"
 		:loading="loading"
 		:placeholder="t('integration_docuseal', 'Cerca utenti o inserisci email...')"
 		label="displayName"
-		track-by="trackId"
-		:tag-placeholder="t('integration_docuseal', 'Premi Invio per aggiungere questa email')"
-		:create-option="createEmailOption"
+		:label-outside="true"
 		@search="onSearch"
 		@update:model-value="onInput">
 		<template #option="slotProps">
@@ -131,18 +128,6 @@ export default {
 			this.loading = false
 		},
 
-		createEmailOption(query) {
-			if (EMAIL_REGEX.test(query)) {
-				return {
-					id: query,
-					displayName: query,
-					type: 'email',
-					email: query,
-					trackId: 'email-' + query,
-				}
-			}
-			return null
-		},
 	},
 }
 </script>

@@ -9,17 +9,19 @@
 			<!-- Signing mode selector -->
 			<div class="mode-selector">
 				<NcCheckboxRadioSwitch
-					v-model:checked="signMode"
+					:model-value="signMode"
 					value="direct"
 					name="sign-mode"
-					type="radio">
+					type="radio"
+					@update:model-value="signMode = $event">
 					{{ t('integration_docuseal', 'Invio diretto PDF') }}
 				</NcCheckboxRadioSwitch>
 				<NcCheckboxRadioSwitch
-					v-model:checked="signMode"
+					:model-value="signMode"
 					value="template"
 					name="sign-mode"
-					type="radio">
+					type="radio"
+					@update:model-value="signMode = $event">
 					{{ t('integration_docuseal', 'Usa template DocuSeal') }}
 				</NcCheckboxRadioSwitch>
 			</div>
@@ -77,18 +79,18 @@
 
 			<!-- Options -->
 			<div class="options-section">
-				<NcCheckboxRadioSwitch v-model:checked="sendEmail">
+				<NcCheckboxRadioSwitch :model-value="sendEmail" @update:model-value="sendEmail = $event">
 					{{ t('integration_docuseal', 'Invia email di notifica ai destinatari') }}
 				</NcCheckboxRadioSwitch>
 
-				<NcCheckboxRadioSwitch v-model:checked="showEmbedOption">
+				<NcCheckboxRadioSwitch :model-value="showEmbedOption" @update:model-value="showEmbedOption = $event">
 					{{ t('integration_docuseal', 'Abilita firma embedded (in-app)') }}
 				</NcCheckboxRadioSwitch>
 			</div>
 
 			<!-- Expiry date -->
 			<div class="expiry-section">
-				<NcCheckboxRadioSwitch v-model:checked="hasExpiry">
+				<NcCheckboxRadioSwitch :model-value="hasExpiry" @update:model-value="hasExpiry = $event">
 					{{ t('integration_docuseal', 'Imposta scadenza') }}
 				</NcCheckboxRadioSwitch>
 				<div v-if="hasExpiry" class="expiry-field">
@@ -101,7 +103,7 @@
 
 			<!-- Custom message -->
 			<div class="message-section">
-				<NcCheckboxRadioSwitch v-model:checked="customMessage">
+				<NcCheckboxRadioSwitch :model-value="customMessage" @update:model-value="customMessage = $event">
 					{{ t('integration_docuseal', 'Messaggio personalizzato') }}
 				</NcCheckboxRadioSwitch>
 				<div v-if="customMessage" class="message-fields">

@@ -500,8 +500,13 @@ export default {
 				const response = await axios.get(url)
 				if (response.data.embedSrc) {
 					this.embedUrl = response.data.embedSrc
+				} else {
+					showError(t('integration_docuseal', 'Nessun URL di firma disponibile per il tuo utente'))
+					this.close()
 				}
 			} catch (e) {
+				const errorMsg = e.response?.data?.error || e.message
+				showError(t('integration_docuseal', 'Impossibile aprire la firma embedded: ') + errorMsg)
 				this.close()
 			}
 		},

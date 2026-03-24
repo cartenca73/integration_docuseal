@@ -1,6 +1,6 @@
 {
 	"name": "integration_docuseal",
-	"version": "1.1.3",
+	"version": "1.1.4",
 	"description": "DocuSeal integration for Nextcloud",
 	"private": true,
 	"scripts": {

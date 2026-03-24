@@ -404,26 +404,52 @@ class DocuSealController extends Controller {
 		try {
 			$request = $this->requestMapper->find($requestId);
 			$submitters = $this->submitterMapper->findByRequestId($requestId);
-
-			// Find a submitter that matches the current user
 			$userInfo = $this->utilsService->getUserInfo($this->userId);
-			$embedSrc = null;
+			$serverUrl = $this->docuSealAPIService->getServerUrl();
 
+			// Find the submitter that matches the current user
+			$matchedSubmitter = null;
 			foreach ($submitters as $submitter) {
 				if ($submitter->getNcUserId() === $this->userId
 					|| ($userInfo !== null && $submitter->getEmail() === $userInfo['email'])) {
-					$embedSrc = $submitter->getEmbedSrc();
+					$matchedSubmitter = $submitter;
 					break;
 				}
 			}
 
-			if ($embedSrc === null) {
-				return new DataResponse(['error' => 'No signing URL available for this user'], Http::STATUS_NOT_FOUND);
+			if ($matchedSubmitter === null) {
+				return new DataResponse(['error' => 'You are not a signer for this request'], Http::STATUS_NOT_FOUND);
+			}
+
+			// Try stored embed_src first
+			$embedSrc = $matchedSubmitter->getEmbedSrc();
+
+			// If not stored, fetch from DocuSeal API using submitter slug
+			if (empty($embedSrc) && $matchedSubmitter->getDocusealSubmitterId() !== null) {
+				try {
+					$dsSubmitter = $this->docuSealAPIService->request(
+						'GET',
+						'/submitters/' . $matchedSubmitter->getDocusealSubmitterId()
+					);
+					$slug = $dsSubmitter['slug'] ?? null;
+					if ($slug !== null) {
+						$embedSrc = $serverUrl . '/s/' . $slug;
+						// Save for future use
+						$matchedSubmitter->setEmbedSrc($embedSrc);
+						$this->submitterMapper->update($matchedSubmitter);
+					}
+				} catch (Exception $e) {
+					$this->logger->warning('Could not fetch submitter embed URL: ' . $e->getMessage());
+				}
+			}
+
+			if (empty($embedSrc)) {
+				return new DataResponse(['error' => 'No signing URL available'], Http::STATUS_NOT_FOUND);
 			}
 
 			return new DataResponse([
 				'embedSrc' => $embedSrc,
-				'serverUrl' => $this->docuSealAPIService->getServerUrl(),
+				'serverUrl' => $serverUrl,
 			]);
 		} catch (Exception $e) {
 			return new DataResponse(['error' => 'Request not found'], Http::STATUS_NOT_FOUND);

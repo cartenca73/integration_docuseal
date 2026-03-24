@@ -11,12 +11,17 @@ use OCA\DocuSeal\Db\SignatureRequestMapper;
 use OCA\DocuSeal\Db\SignatureRequestSubmitter;
 use OCA\DocuSeal\Db\SignatureRequestSubmitterMapper;
 use OCA\DocuSeal\Service\DocuSealAPIService;
+use OCA\DocuSeal\Service\JwtService;
 use OCA\DocuSeal\Service\UtilsService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
+use OCP\AppFramework\Http\DataDownloadResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 use Psr\Log\LoggerInterface;
 
 class DocuSealController extends Controller {
@@ -27,9 +32,11 @@ class DocuSealController extends Controller {
 		string $appName,
 		IRequest $request,
 		private DocuSealAPIService $docuSealAPIService,
+		private JwtService $jwtService,
 		private UtilsService $utilsService,
 		private SignatureRequestMapper $requestMapper,
 		private SignatureRequestSubmitterMapper $submitterMapper,
+		private IURLGenerator $urlGenerator,
 		private LoggerInterface $logger,
 		?string $userId,
 	) {
@@ -67,6 +74,70 @@ class DocuSealController extends Controller {
 	}
 
 	/**
+	 * Generate a JWT token for the DocuSeal template builder
+	 */
+	#[NoAdminRequired]
+	public function getBuilderToken(int $fileId): DataResponse {
+		if (!$this->docuSealAPIService->isConfigured()) {
+			return new DataResponse(['error' => 'DocuSeal is not configured'], Http::STATUS_BAD_REQUEST);
+		}
+
+		try {
+			$file = $this->utilsService->getFileForUser($this->userId, $fileId);
+			$userInfo = $this->utilsService->getUserInfo($this->userId);
+
+			// Generate a secure download URL for DocuSeal to fetch the file
+			$downloadToken = $this->jwtService->generateFileDownloadToken($fileId, $this->userId);
+			$downloadUrl = $this->urlGenerator->getAbsoluteURL(
+				$this->urlGenerator->linkToRoute('integration_docuseal.docuSeal.getFileContent', [
+					'fileId' => $fileId,
+					'token' => $downloadToken,
+				])
+			);
+
+			$token = $this->jwtService->generateBuilderToken(
+				$userInfo['email'] ?? $this->userId . '@localhost',
+				pathinfo($file->getName(), PATHINFO_FILENAME),
+				[$downloadUrl],
+			);
+
+			return new DataResponse([
+				'token' => $token,
+				'serverUrl' => $this->docuSealAPIService->getServerUrl(),
+			]);
+		} catch (Exception $e) {
+			$this->logger->error('Error generating builder token: ' . $e->getMessage(), [
+				'app' => Application::APP_ID,
+			]);
+			return new DataResponse(['error' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	/**
+	 * Public endpoint for DocuSeal server to download a file
+	 */
+	#[PublicPage]
+	#[NoCSRFRequired]
+	#[NoAdminRequired]
+	public function getFileContent(int $fileId, string $token): DataDownloadResponse|DataResponse {
+		$validated = $this->jwtService->validateFileDownloadToken($token);
+		if ($validated === null || $validated['fileId'] !== $fileId) {
+			return new DataResponse(['error' => 'Invalid or expired token'], Http::STATUS_FORBIDDEN);
+		}
+
+		try {
+			$file = $this->utilsService->getFileForUser($validated['userId'], $fileId);
+			return new DataDownloadResponse(
+				$file->getContent(),
+				$file->getName(),
+				$file->getMimeType()
+			);
+		} catch (Exception $e) {
+			return new DataResponse(['error' => 'File not found'], Http::STATUS_NOT_FOUND);
+		}
+	}
+
+	/**
 	 * Send a PDF file directly for signing
 	 */
 	#[NoAdminRequired]
@@ -80,7 +151,8 @@ class DocuSealController extends Controller {
 		$sendEmail = $this->request->getParam('sendEmail', true);
 		$subject = $this->request->getParam('subject');
 		$message = $this->request->getParam('message');
-		$expireAt = $this->request->getParam('expireAt'); // ISO 8601 date string
+		$expireAt = $this->request->getParam('expireAt');
+		$builderTemplateId = $this->request->getParam('builderTemplateId');
 
 		if (empty($targetEmails) && empty($targetUserIds)) {
 			return new DataResponse(['error' => 'No recipients specified'], Http::STATUS_BAD_REQUEST);
@@ -89,9 +161,7 @@ class DocuSealController extends Controller {
 		try {
 			// Get the file
 			$file = $this->utilsService->getFileForUser($this->userId, $fileId);
-			$fileContent = $file->getContent();
 			$fileName = $file->getName();
-			$fileMime = $file->getMimeType();
 
 			// Validate file type
 			$allowedMimes = [
@@ -101,9 +171,9 @@ class DocuSealController extends Controller {
 				'image/png',
 				'image/jpeg',
 			];
-			if (!in_array($fileMime, $allowedMimes, true)) {
+			if (!in_array($file->getMimeType(), $allowedMimes, true)) {
 				return new DataResponse(
-					['error' => 'Tipo di file non supportato. Usa PDF, DOCX, PNG o JPEG.'],
+					['error' => 'Unsupported file type. Use PDF, DOCX, PNG or JPEG.'],
 					Http::STATUS_BAD_REQUEST
 				);
 			}
@@ -115,16 +185,37 @@ class DocuSealController extends Controller {
 				return new DataResponse(['error' => 'No valid recipients found'], Http::STATUS_BAD_REQUEST);
 			}
 
-			// Create submission via DocuSeal API
-			$result = $this->docuSealAPIService->createDirectSubmission(
-				$fileContent,
-				$fileName,
-				$submitters,
-				$subject,
-				$message,
-				$sendEmail,
-				$expireAt,
-			);
+			// If builder provided a template, use it directly
+			if ($builderTemplateId !== null && (int)$builderTemplateId > 0) {
+				$templateId = (int)$builderTemplateId;
+				// Get template to assign submitter roles
+				$templateResult = $this->docuSealAPIService->getTemplate($templateId);
+				$templateRole = $templateResult['submitters'][0]['name'] ?? 'First Party';
+				foreach ($submitters as &$submitter) {
+					$submitter['role'] = $templateRole;
+				}
+				unset($submitter);
+
+				$result = $this->docuSealAPIService->createTemplateSubmission(
+					$templateId,
+					$submitters,
+					$sendEmail,
+					$subject,
+					$message,
+					$expireAt,
+				);
+			} else {
+				// Legacy: create template from file with hardcoded fields
+				$result = $this->docuSealAPIService->createDirectSubmission(
+					$file->getContent(),
+					$fileName,
+					$submitters,
+					$subject,
+					$message,
+					$sendEmail,
+					$expireAt,
+				);
+			}
 
 			// Save request to database
 			$signatureRequest = $this->saveSignatureRequest(

@@ -1,6 +1,6 @@
 {
 	"name": "integration_docuseal",
-	"version": "1.0.7",
+	"version": "1.1.0",
 	"description": "DocuSeal integration for Nextcloud",
 	"private": true,
 	"scripts": {
@@ -12,6 +12,7 @@
 		"stylelint": "stylelint src/**/*.vue src/**/*.scss src/**/*.css"
 	},
 	"dependencies": {
+		"@docuseal/vue": "^1.0.52",
 		"@nextcloud/axios": "^2.5.0",
 		"@nextcloud/dialogs": "^7.0.0",
 		"@nextcloud/files": "^4.0.0",

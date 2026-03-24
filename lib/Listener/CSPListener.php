@@ -31,10 +31,12 @@ class CSPListener implements IEventListener {
 			return;
 		}
 
-		// Allow the DocuSeal server URL as frame-src for embedded signing
+		// Allow the DocuSeal server URL for embedded signing and builder
 		$csp = new ContentSecurityPolicy();
 		$csp->addAllowedFrameDomain($serverUrl);
 		$csp->addAllowedConnectDomain($serverUrl);
+		$csp->addAllowedImageDomain($serverUrl);
+		$csp->addAllowedScriptDomain($serverUrl);
 
 		$event->addPolicy($csp);
 	}

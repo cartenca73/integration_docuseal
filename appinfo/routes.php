@@ -14,6 +14,10 @@ return [
 		['name' => 'docuSeal#getTemplates', 'url' => '/templates', 'verb' => 'GET'],
 		['name' => 'docuSeal#getTemplateDetail', 'url' => '/templates/{templateId}', 'verb' => 'GET'],
 
+		// Template builder
+		['name' => 'docuSeal#getBuilderToken', 'url' => '/builder-token/{fileId}', 'verb' => 'GET'],
+		['name' => 'docuSeal#getFileContent', 'url' => '/file-download/{fileId}', 'verb' => 'GET'],
+
 		// Signing - direct PDF/DOCX upload
 		['name' => 'docuSeal#signDirect', 'url' => '/sign/direct/{fileId}', 'verb' => 'POST'],
 		// Signing - using a template

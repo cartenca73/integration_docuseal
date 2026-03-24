@@ -350,9 +350,13 @@ export default {
 
 		async openBuilder() {
 			this.loadingBuilder = true
+			this.builderToken = null
 			this.step = 'builder'
 			try {
-				const url = generateUrl('/apps/integration_docuseal/builder-token/{fileId}', { fileId: this.fileId })
+				let url = generateUrl('/apps/integration_docuseal/builder-token/{fileId}', { fileId: this.fileId })
+				if (this.configuredTemplateId) {
+					url += '?templateId=' + this.configuredTemplateId
+				}
 				const response = await axios.get(url)
 				this.builderToken = response.data.token
 				// Extract hostname for the builder component

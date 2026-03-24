@@ -85,6 +85,7 @@ class DocuSealController extends Controller {
 		try {
 			$file = $this->utilsService->getFileForUser($this->userId, $fileId);
 			$userInfo = $this->utilsService->getUserInfo($this->userId);
+			$existingTemplateId = $this->request->getParam('templateId');
 
 			// Generate a secure download URL for DocuSeal to fetch the file
 			$downloadToken = $this->jwtService->generateFileDownloadToken($fileId, $this->userId);
@@ -99,6 +100,7 @@ class DocuSealController extends Controller {
 				$userInfo['email'] ?? $this->userId . '@localhost',
 				pathinfo($file->getName(), PATHINFO_FILENAME),
 				[$downloadUrl],
+				$existingTemplateId ? (int)$existingTemplateId : null,
 			);
 
 			return new DataResponse([

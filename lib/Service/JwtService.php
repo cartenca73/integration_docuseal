@@ -24,6 +24,7 @@ class JwtService {
 		string $userEmail,
 		string $templateName,
 		array $documentUrls,
+		?int $templateId = null,
 	): string {
 		$apiKey = $this->docuSealAPIService->getApiKey();
 		if ($apiKey === '') {
@@ -39,10 +40,15 @@ class JwtService {
 			'user_email' => $this->getDocuSealUserEmail(),
 			'integration_email' => $userEmail,
 			'name' => $templateName,
-			'document_urls' => $documentUrls,
 			'iat' => time(),
 			'exp' => time() + 3600,
 		];
+
+		if ($templateId !== null) {
+			$payload['template_id'] = $templateId;
+		} else {
+			$payload['document_urls'] = $documentUrls;
+		}
 
 		$headerEncoded = $this->base64UrlEncode(json_encode($header));
 		$payloadEncoded = $this->base64UrlEncode(json_encode($payload));

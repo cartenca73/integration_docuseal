@@ -12,16 +12,16 @@
 		:create-option="createEmailOption"
 		@search="onSearch"
 		@update:model-value="onInput">
-		<template #option="{ displayName, type, email }">
-			<div class="option-row">
-				<NcAvatar v-if="type === 'user'" :user="email" :size="24" />
+		<template #option="slotProps">
+			<div v-if="slotProps" class="option-row">
+				<NcAvatar v-if="slotProps.type === 'user'" :user="slotProps.email" :size="24" />
 				<span v-else class="email-icon">✉</span>
-				<span class="option-name">{{ displayName }}</span>
-				<span v-if="email && type === 'user'" class="option-email">({{ email }})</span>
+				<span class="option-name">{{ slotProps.displayName }}</span>
+				<span v-if="slotProps.email && slotProps.type === 'user'" class="option-email">({{ slotProps.email }})</span>
 			</div>
 		</template>
 		<template #tag="{ option }">
-			<span class="tag-item">
+			<span v-if="option" class="tag-item">
 				<NcAvatar v-if="option.type === 'user'" :user="option.id" :size="20" />
 				<span v-else class="email-icon-small">✉</span>
 				{{ option.displayName }}

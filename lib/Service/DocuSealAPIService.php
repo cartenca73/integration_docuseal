@@ -255,13 +255,10 @@ class DocuSealAPIService {
 		];
 
 		if ($subject !== null || $message !== null) {
-			$params['message'] = [];
-			if ($subject !== null) {
-				$params['message']['subject'] = $subject;
-			}
-			if ($message !== null) {
-				$params['message']['body'] = $message;
-			}
+			$params['message'] = [
+				'subject' => $subject ?? 'Richiesta di firma',
+				'body' => $message ?? 'Si prega di firmare il documento allegato.',
+			];
 		}
 
 		if ($expireAt !== null) {

@@ -120,7 +120,7 @@ class DocuSealController extends Controller {
 				$fileContent,
 				$fileName,
 				$submitters,
-				$subject ?? 'Firma del documento: ' . $fileName,
+				$subject,
 				$message,
 				$sendEmail,
 				$expireAt,

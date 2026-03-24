@@ -20,7 +20,7 @@
 2. Enter your DocuSeal server URL and API key
 3. Start requesting signatures from the Files app
 	]]></description>
-	<version>1.1.0</version>
+	<version>1.1.1</version>
 	<licence>agpl</licence>
 	<author mail="admin@ce4u.it">GEST CE</author>
 	<namespace>DocuSeal</namespace>

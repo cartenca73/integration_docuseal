@@ -27,8 +27,8 @@
 						:with-upload-button="false"
 						:with-title="false"
 						:with-documents-list="false"
-						:autosave="true"
-						:save-button-text="t('integration_docuseal', 'Salva configurazione')"
+						:autosave="false"
+						:save-button-text="t('integration_docuseal', 'Salva e continua')"
 						:background-color="'#f5f5f5'"
 						@save="onBuilderSave"
 						@load="onBuilderLoad" />
@@ -371,9 +371,12 @@ export default {
 		},
 
 		onBuilderSave(data) {
-			if (data && data.id) {
-				this.configuredTemplateId = data.id
+			const templateId = data?.id || data?.template_id
+			if (!templateId) {
+				console.warn('Builder save event without template ID:', data)
+				return
 			}
+			this.configuredTemplateId = templateId
 			this.step = 'ready'
 			showSuccess(t('integration_docuseal', 'Configurazione campi salvata!'))
 		},

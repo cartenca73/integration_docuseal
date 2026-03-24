@@ -314,7 +314,8 @@ export default {
 
 	computed: {
 		canSubmit() {
-			if (this.recipients.length === 0) {
+			// Embed signing auto-adds current user, so no recipients needed
+			if (this.recipients.length === 0 && !this.showEmbedOption) {
 				return false
 			}
 			if (this.signMode === 'template' && !this.selectedTemplate) {

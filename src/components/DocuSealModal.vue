@@ -449,6 +449,7 @@ export default {
 						targetUserIds,
 						targetEmails,
 						sendEmail: this.sendEmail,
+						embedSign: this.showEmbedOption,
 					}
 					if (this.configuredTemplateId) {
 						params.builderTemplateId = this.configuredTemplateId
@@ -461,6 +462,7 @@ export default {
 						targetUserIds,
 						targetEmails,
 						sendEmail: this.sendEmail,
+						embedSign: this.showEmbedOption,
 					}
 				}
 

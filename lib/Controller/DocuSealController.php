@@ -155,6 +155,14 @@ class DocuSealController extends Controller {
 		$message = $this->request->getParam('message');
 		$expireAt = $this->request->getParam('expireAt');
 		$builderTemplateId = $this->request->getParam('builderTemplateId');
+		$embedSign = $this->request->getParam('embedSign', false);
+
+		// If embed signing is requested, ensure current user is a signer
+		if ($embedSign) {
+			if (!in_array($this->userId, $targetUserIds ?? [], true)) {
+				$targetUserIds[] = $this->userId;
+			}
+		}
 
 		if (empty($targetEmails) && empty($targetUserIds)) {
 			return new DataResponse(['error' => 'No recipients specified'], Http::STATUS_BAD_REQUEST);
@@ -251,7 +259,15 @@ class DocuSealController extends Controller {
 		$targetEmails = $this->request->getParam('targetEmails', []);
 		$targetUserIds = $this->request->getParam('targetUserIds', []);
 		$sendEmail = $this->request->getParam('sendEmail', true);
+		$embedSign = $this->request->getParam('embedSign', false);
 		$subject = $this->request->getParam('subject');
+
+		// If embed signing is requested, ensure current user is a signer
+		if ($embedSign) {
+			if (!in_array($this->userId, $targetUserIds ?? [], true)) {
+				$targetUserIds[] = $this->userId;
+			}
+		}
 		$message = $this->request->getParam('message');
 
 		if ($templateId <= 0) {

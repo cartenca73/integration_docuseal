@@ -396,7 +396,15 @@ class WebhookController extends Controller {
 		if ($signature === '') {
 			// Fallback: check shared secret in query param
 			$querySecret = $this->request->getParam('secret', '');
+			if ($querySecret === '') {
+				return false;
+			}
 			return hash_equals($webhookSecret, $querySecret);
+		}
+
+		// DocuSeal may prefix the signature with "sha256="
+		if (str_starts_with($signature, 'sha256=')) {
+			$signature = substr($signature, 7);
 		}
 
 		$expectedSignature = hash_hmac('sha256', $body, $webhookSecret);

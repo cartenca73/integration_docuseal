@@ -1,0 +1,35 @@
+services:
+  nextcloud:
+    image: nextcloud:30-apache
+    container_name: nc_docuseal
+    restart: unless-stopped
+    ports:
+      - "9191:80"
+    environment:
+      NEXTCLOUD_ADMIN_USER: admin
+      NEXTCLOUD_ADMIN_PASSWORD: admin123
+      NEXTCLOUD_TRUSTED_DOMAINS: "localhost:9191 host.docker.internal"
+      SQLITE_DATABASE: nextcloud
+    volumes:
+      - nextcloud_html:/var/www/html
+      - nextcloud_data:/var/www/html/data
+      - nextcloud_config:/var/www/html/config
+      - nextcloud_apps:/var/www/html/custom_apps
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  docuseal:
+    image: docuseal/docuseal:latest
+    container_name: docuseal
+    restart: unless-stopped
+    ports:
+      - "4040:3000"
+    volumes:
+      - docuseal_data:/data
+
+volumes:
+  nextcloud_html:
+  nextcloud_data:
+  nextcloud_config:
+  nextcloud_apps:
+  docuseal_data:

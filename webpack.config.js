@@ -8,4 +8,13 @@ webpackConfig.entry = {
 	sidebar: path.join(__dirname, 'src', 'sidebar.js'),
 }
 
+// Fix Webpack 5 ESM "fully specified" errors for axios, webdav, @vue/devtools-shared, etc.
+webpackConfig.module = webpackConfig.module || { rules: [] }
+webpackConfig.module.rules = webpackConfig.module.rules || []
+webpackConfig.module.rules.push({
+	test: /\.m?js$/,
+	include: /node_modules/,
+	resolve: { fullySpecified: false },
+})
+
 module.exports = webpackConfig
